@@ -1,0 +1,15 @@
+html, body {
+    padding: 0px;
+    margin: 0px;
+    background:#040707;
+    height:100%;
+    overflow: hidden;
+}
+
+svg {
+    position: absolute;
+}
+
+canvas {
+    position: absolute;
+}
