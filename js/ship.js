@@ -1,8 +1,9 @@
-function Ship(position, width, height, color, addBullet) {
+function Ship(id, position, width, height, color, addBullet, removeShip) {
     if (!(this instanceof Ship)) {
-        return new Ship(position, width, height, color, addBullet);
+        return new Ship(id, position, width, height, color, addBullet, removeShip);
     }
 
+    this.id = id;
     this.svg;
     this.polygone;
     this.group;
@@ -33,6 +34,7 @@ function Ship(position, width, height, color, addBullet) {
     this.shootCounterLimit = 20;
     this.addBullet = addBullet;
 
+    this.removeShip = removeShip;
     this.render()
     this.update();
 }
@@ -42,13 +44,13 @@ Ship.prototype.update = function () {
     this.velocityMag = this.velocity.magnitude();
 
     if (this.doRight) {
-        this.angle -= 2;
+        this.angle -= 4;
         this.rotate()
         this.velocity.setComponents(this.angle, this.velocityMag);
     }
 
     if (this.doLeft) {
-        this.angle += 2;
+        this.angle += 4;
         this.rotate();
         this.velocity.setComponents(this.angle, this.velocityMag);
     }
@@ -94,6 +96,7 @@ Ship.prototype.update = function () {
 Ship.prototype.render = function () {
     let xmlns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(xmlns, 'svg');
+    this.svg.setAttribute('id', this.id);
     this.svg.setAttribute('width', this.width);
     this.svg.setAttribute('height', this.height);
     this.svg.style.fill = this.color;

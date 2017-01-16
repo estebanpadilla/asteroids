@@ -1,8 +1,9 @@
-function Asteroid(position, direction, speed, type, color) {
+function Asteroid(id, position, direction, speed, type, color, removeAsteroid) {
     if (!(this instanceof Asteroid)) {
-        return new Asteroid(position, direction, speed, type, color);
+        return new Asteroid(id, position, direction, speed, type, color, removeAsteroid);
     }
 
+    this.id = id;
     this.svg;
     this.polygone;
     this.group;
@@ -42,6 +43,7 @@ function Asteroid(position, direction, speed, type, color) {
         this.height = 20;
     }
 
+    this.removeAsteroid = removeAsteroid;
     this.render()
     this.update();
 }
@@ -59,6 +61,7 @@ Asteroid.prototype.update = function () {
 Asteroid.prototype.render = function () {
     let xmlns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(xmlns, 'svg');
+    this.svg.setAttribute('id', this.id);
     this.svg.setAttribute('width', this.width);
     this.svg.setAttribute('height', this.height);
     this.svg.style.fill = this.color;
@@ -96,4 +99,8 @@ Asteroid.prototype.checkBoundaries = function () {
 
     this.svg.style.left = this.position.x;
     this.svg.style.top = this.position.y;
+}
+
+Asteroid.prototype.isTouching = function (rect) {
+    return false;
 }

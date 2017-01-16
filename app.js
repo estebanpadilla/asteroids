@@ -6,28 +6,42 @@ function init() {
 
     let l1 = [1, 2, 1, 3, 2, 1, 2, 2, 1, 3, 4, 2, 1, 4, 4, 2, 1, 3, 1, 1, 2, 3];
 
-    let pool = [];
+    let goCounter = 0;
+    let poolAsteroids = new Map();
+    let poolBullets = new Map();
     let angle = 0;
-    let ship = Ship(Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, '#f58d82', addBullet);
-    pool.push(ship);
 
-    for (var i = 0; i < l1.length; i++) {
-        let y = -100;
-        let x = 0;
+    goCounter++;
+    let ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, '#f58d82', addBullet, null);
+    // pool.set(goCounter, ship);
 
-        if (i % 2 == 0) {
-            x = ramdonIn(0, window.innerWidth / 2);
+    goCounter++;
+    let asteroid = Asteroid(goCounter, Vector(((window.innerWidth / 2) + 100), 150), ramdonIn(-90, 90), 0, 1, ramdonColor(), removeAsteroid);
+    poolAsteroids.set(goCounter, asteroid);
 
-        } else {
-            x = ramdonIn(window.innerWidth / 2, window.innerWidth);
+
+
+    function addAsteroids() {
+
+        for (var i = 0; i < l1.length; i++) {
+            let y = -100;
+            let x = 0;
+
+            if (i % 2 == 0) {
+                x = ramdonIn(0, window.innerWidth / 2);
+
+            } else {
+                x = ramdonIn(window.innerWidth / 2, window.innerWidth);
+            }
+
+            if (i % 3 == 0) {
+                y = window.innerHeight;
+            }
+
+            goCounter++;
+            let asteroid = Asteroid(goCounter, Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), l1[i], ramdonColor(), removeAsteroid);
+            pool.set(goCounter, asteroid);
         }
-
-        if (i % 3 == 0) {
-            y = window.innerHeight;
-        }
-
-        let asteroid = Asteroid(Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), l1[i], ramdonColor());
-        pool.push(asteroid);
     }
 
     function ramdonColor() {
@@ -111,9 +125,24 @@ function init() {
 
     function update() {
 
-        pool.forEach(function (element) {
-            element.update();
-        }, this);
+
+        ship.update();
+
+        for (let bullet of poolBullets.values()) {
+            bullet.update();
+            for (let asteroid of poolAsteroids.values()) {
+                if (asteroid.isTouching(null)) {
+
+                }
+
+            }
+
+        }
+
+        for (let asteroid of poolAsteroids.values()) {
+            asteroid.update();
+        }
+
         requestAnimationFrame(update);
     }
 
@@ -133,9 +162,9 @@ function init() {
                 break;
             case 32:
                 ship.doShoot = true;
-                if (ship.canShoot) {
-                    addBullet();
-                }
+                // if (ship.canShoot) {
+                //     addBullet();
+                // }
                 break;
             default:
                 break;
@@ -163,8 +192,17 @@ function init() {
 
     function addBullet() {
         let shootPosition = Vector((ship.position.x + (ship.width / 2) - 2), (ship.position.y + (ship.height / 2) - 2));
-        let bullet = Bullet(shootPosition, ship.angle, (5 + ship.velocityMag), 'white');
-        pool.push(bullet);
+        goCounter++;
+        let bullet = Bullet(goCounter, shootPosition, ship.angle, (5 + ship.velocityMag), 'white', removeBullet);
+        poolBullets.set(goCounter, bullet);
+    }
+
+    function removeBullet(go) {
+        poolBullets.delete(go.id);
+    }
+
+    function removeAsteroid(go) {
+        poolAsteroids.delete(go.id)
     }
 
     function ramdonIn(max, min) {

@@ -1,8 +1,9 @@
-function Bullet(position, direction, speed, color) {
+function Bullet(id, position, direction, speed, color, removeBullet) {
     if (!(this instanceof Bullet)) {
-        return new Bullet(position, direction, speed, color);
+        return new Bullet(id, position, direction, speed, color, removeBullet);
     }
 
+    this.id = id;
     this.svg;
     this.rect;
     this.group;
@@ -17,7 +18,7 @@ function Bullet(position, direction, speed, color) {
     this.velocityMag = 0;
     this.velocity = Vector().setComponents(direction, speed);
 
-
+    this.removeBullet = removeBullet;
     this.render()
     this.update();
     this.rotate();
@@ -36,6 +37,7 @@ Bullet.prototype.update = function () {
 Bullet.prototype.render = function () {
     let xmlns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(xmlns, 'svg');
+    this.svg.setAttribute('id', this.id);
     this.svg.setAttribute('width', this.width);
     this.svg.setAttribute('height', this.height);
     this.svg.style.fill = this.color;
@@ -56,20 +58,12 @@ Bullet.prototype.rotate = function () {
 
 Bullet.prototype.checkBoundaries = function () {
 
-    if (this.position.x > (window.innerWidth + this.width)) {
-        this.position.x = (0 - this.width);
-    }
-
-    if (this.position.x < (0 - this.width)) {
-        this.position.x = window.innerWidth;
-    }
-
-    if (this.position.y > (window.innerHeight + this.height)) {
-        this.position.y = (0 - this.height);
-    }
-
-    if (this.position.y < (0 - this.height)) {
-        this.position.y = window.innerHeight;
+    if (this.position.x > (window.innerWidth + this.width) ||
+        this.position.x < (0 - this.width) ||
+        this.position.y > (window.innerHeight + this.height) ||
+        this.position.y < (0 - this.height)) {
+        this.svg.parentNode.removeChild(this.svg);
+        this.removeBullet(this);
     }
 
     this.svg.style.left = this.position.x;

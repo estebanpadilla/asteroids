@@ -15,6 +15,6 @@
     "tests"
   ],
   "dependencies": {
-    "ludusy": "^1.0.8"
+    "ludusy": "^1.0.9"
   }
 }
