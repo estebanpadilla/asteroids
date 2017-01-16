@@ -102,5 +102,15 @@ Asteroid.prototype.checkBoundaries = function () {
 }
 
 Asteroid.prototype.isTouching = function (rect) {
+    // console.log(rect);
+    if ((rect.x + rect.width) > this.position.x &&
+        rect.x < (this.position.x + this.width) &&
+        (rect.y + rect.width) > this.position.y &&
+        rect.y < (this.position.y + this.height)) {
+        this.svg.parentNode.removeChild(this.svg);
+        this.removeAsteroid(this);
+        return true;
+    }
     return false;
 }
+

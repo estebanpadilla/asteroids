@@ -62,10 +62,14 @@ Bullet.prototype.checkBoundaries = function () {
         this.position.x < (0 - this.width) ||
         this.position.y > (window.innerHeight + this.height) ||
         this.position.y < (0 - this.height)) {
-        this.svg.parentNode.removeChild(this.svg);
-        this.removeBullet(this);
+        this.remove();
     }
 
     this.svg.style.left = this.position.x;
     this.svg.style.top = this.position.y;
+}
+
+Bullet.prototype.remove = function () {
+    this.svg.parentNode.removeChild(this.svg);
+    this.removeBullet(this);
 }

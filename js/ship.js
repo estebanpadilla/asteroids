@@ -31,7 +31,7 @@ function Ship(id, position, width, height, color, addBullet, removeShip) {
 
     this.canShoot = true;
     this.shootCounter = 0;
-    this.shootCounterLimit = 20;
+    this.shootCounterLimit = 15;
     this.addBullet = addBullet;
 
     this.removeShip = removeShip;
@@ -134,4 +134,9 @@ Ship.prototype.checkBoundaries = function () {
 
     this.svg.style.left = this.position.x;
     this.svg.style.top = this.position.y;
+}
+
+Ship.prototype.remove = function () {
+    this.svg.parentNode.removeChild(this.svg);
+    this.removeShip(this);
 }
