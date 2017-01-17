@@ -8,57 +8,37 @@ function init() {
     let asteroidBig = 10;
     let asteroidMed = 15;
     let asteroidSmall = 25;
+    let alienBig = 10;
+    let alienMed = 15;
+    let alienSmall = 25;
     let level = 0;
-    let levels = [[1, 2, 1, 2, 2, 2],
-    [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
-    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
-    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
+    // let levels = [[1, 2, 1, 2, 2, 2],
+    // [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
+    // [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
+    // [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
 
-    // let levels = [[4],
-    // [4],
-    // [4]];
+    let levels = [[4],
+    [4],
+    [4]];
 
     let background = '#2b0d3b';
     let creme = '#f6e6ca';
     let lightblue = '#b5e2ef';
     let red = '#ee3344';
     let bulletColor = 'lawngreen';
+    let alienColor = '#ffdd17';
     let goCounter = 0;
     let poolAsteroids = new Map();
     let poolBullets = new Map();
+    let poolAliens = new Map;
+    let poolAlienBullets = new Map;
+
     let angle = 0;
 
     let scoreTitle = document.getElementById('scoreTitle');
     let levelTitle = document.getElementById('levelTitle');
     let startBtn = document.getElementById('startBtn');
     startBtn.onclick = startBtnClick;
-
-    function addShip() {
-        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, bulletColor, addBullet, removeShip);
-    }
-
-    function addAsteroids() {
-
-        for (var i = 0; i < levels[level].length; i++) {
-            let y = -100;
-            let x = 0;
-
-            if (i % 2 == 0) {
-                x = ramdonIn(0, window.innerWidth / 2);
-
-            } else {
-                x = ramdonIn(window.innerWidth / 2, window.innerWidth);
-            }
-
-            if (i % 3 == 0) {
-                y = window.innerHeight;
-            }
-
-            goCounter++;
-            let asteroid = Asteroid(goCounter, Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), levels[level][i], ramdonColor(), removeAsteroid);
-            poolAsteroids.set(goCounter, asteroid);
-        }
-    }
 
     addAsteroids();
     update();
@@ -71,11 +51,18 @@ function init() {
                 bullet.remove();
             } else {
                 for (let asteroid of poolAsteroids.values()) {
-
                     let rect = Rect(bullet.position.x, bullet.position.y, bullet.width, bullet.height);
                     if (asteroid.isTouching(rect)) {
                         addAsteroidOnTouch(asteroid);
                         bullet.remove();
+                        break;
+                    }
+                }
+                for (let alien of poolAliens.values()) {
+                    let rect = Rect((alien.position.x + 5), (alien.position.y + 20), (alien.width - 20), (alien.height - 20));
+                    if (bullet.isTouching(rect)) {
+                        console.log('ship destroy alien');
+                        alien.remove();
                         break;
                     }
                 }
@@ -92,6 +79,28 @@ function init() {
                 }
             }
             asteroid.update();
+        }
+
+        for (let alien of poolAliens.values()) {
+            alien.update();
+        }
+
+        for (let bullet of poolAlienBullets.values()) {
+
+            bullet.update();
+
+            if (bullet.readyToRemove) {
+                bullet.remove();
+            } else {
+                if (ship != null) {
+                    let rect = Rect((ship.position.x + 5), (ship.position.y + 20), (ship.width - 20), (ship.height - 20));
+                    if (bullet.isTouching(rect)) {
+                        console.log('ship destroy by alien');
+                        gameEnd();
+                        break;
+                    }
+                }
+            }
         }
 
         if (ship != null) {
@@ -140,6 +149,11 @@ function init() {
         }
     }
 
+    //Add Methods
+    function addShip() {
+        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, bulletColor, addBullet, removeShip);
+    }
+
     function addBullet() {
         let shootPosition = Vector((ship.position.x + (ship.width / 2) - 2), (ship.position.y + (ship.height / 2) - 2));
         goCounter++;
@@ -147,20 +161,45 @@ function init() {
         poolBullets.set(goCounter, bullet);
     }
 
-    function removeBullet(go) {
-        poolBullets.delete(go.id);
+    function addAlienBullet(alien) {
+
+        let position;
+        let direction = 0;
+        if (alien.shootUp) {
+            direction = ramdonIn(260, 315);
+            position = Vector(alien.position.x + (alien.width / 2), alien.position.y);
+        } else {
+            direction = ramdonIn(45, 110);
+            position = Vector(alien.position.x + (alien.width / 2), (alien.position.y + alien.height));
+        }
+
+        // let shootPosition = Vector(alien.position.x, alien.position.y);
+        goCounter++;
+        let bullet = Bullet(goCounter, position, direction, ramdonIn(2, 5), alien.color, removeAlienBullet);
+        poolAlienBullets.set(goCounter, bullet);
     }
 
-    function removeAsteroid(go) {
-        poolAsteroids.delete(go.id)
-    }
+    function addAsteroids() {
 
-    function removeShip(go) {
-        ship = null;
-    }
+        for (var i = 0; i < levels[level].length; i++) {
+            let y = -100;
+            let x = 0;
 
-    function ramdonIn(max, min) {
-        return Math.floor(Math.random() * (max - min) + min);
+            if (i % 2 == 0) {
+                x = ramdonIn(0, window.innerWidth / 2);
+
+            } else {
+                x = ramdonIn(window.innerWidth / 2, window.innerWidth);
+            }
+
+            if (i % 3 == 0) {
+                y = window.innerHeight;
+            }
+
+            goCounter++;
+            let asteroid = Asteroid(goCounter, Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), levels[level][i], ramdonColor(), removeAsteroid);
+            poolAsteroids.set(goCounter, asteroid);
+        }
     }
 
     function addAsteroidOnTouch(asteroid) {
@@ -195,6 +234,36 @@ function init() {
         }
     }
 
+    function addAlient() {
+        goCounter++;
+        let alien = Alien(goCounter, Vector(50, 500), 0, ramdonIn(1, 3), 3, alienColor, addAlienBullet, removeAlient);
+        poolAliens.set(goCounter, alien);
+    }
+
+    addAlient();
+
+    //Remove Methods
+    function removeBullet(go) {
+        poolBullets.delete(go.id);
+    }
+
+    function removeAlienBullet(go) {
+        poolAlienBullets.delete(go.id);
+    }
+
+    function removeAsteroid(go) {
+        poolAsteroids.delete(go.id)
+    }
+
+    function removeAlient(go) {
+        poolAliens.delete(go.id);
+    }
+
+    function removeShip(go) {
+        ship = null;
+    }
+
+    //Game play methods
     function gameEnd() {
         ship.remove();
         startBtn.disabled = false;
@@ -241,6 +310,12 @@ function init() {
         }, this);
     }
 
+    function cleanAliend() {
+        poolAsteroids.forEach(function (alien) {
+            alien.remove();
+        }, this);
+    }
+
     function levelCompleted() {
         // cleanBullets();
         setTimeout(startNewLevel, 1000);
@@ -258,6 +333,7 @@ function init() {
 
     }
 
+    //Construction methods
     function ramdonColor() {
         let value = ramdonIn(1, 11);
         switch (value) {
@@ -335,5 +411,10 @@ function init() {
                 break;
         }
     }
+
+    function ramdonIn(max, min) {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
+
 
 }
