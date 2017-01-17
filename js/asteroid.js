@@ -107,10 +107,13 @@ Asteroid.prototype.isTouching = function (rect) {
         rect.x < (this.position.x + this.width) &&
         (rect.y + rect.width) > this.position.y &&
         rect.y < (this.position.y + this.height)) {
-        this.svg.parentNode.removeChild(this.svg);
-        this.removeAsteroid(this);
         return true;
     }
     return false;
+}
+
+Asteroid.prototype.remove = function () {
+    this.svg.parentNode.removeChild(this.svg);
+    this.removeAsteroid(this);
 }
 

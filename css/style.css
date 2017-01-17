@@ -6,10 +6,56 @@ html, body {
     overflow: hidden;
 }
 
+.score {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 60px;
+    color: white;
+    width: 50%;
+    text-align: center;
+    
+}
+
+.level {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 60px;
+    color: white;
+    width: 20%;
+    text-align: center;
+}
+
 svg {
     position: absolute;
 }
 
 canvas {
     position: absolute;
+}
+
+.scorePanel {
+    position: relative;
+    z-index: 99 !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.startBtn{
+    position: absolute;
+    z-index: 99 !important;
+    border: solid;
+    border-width: 5px;
+    border-color: #ee3344;
+    border-radius: 0px;
+    left: 25%;
+    top: 40%;
+    width: 50%;
+    height: 20%;
+    min-height:20%; 
+    background: rgba(0, 0,0, 0.25);
+    color: #ee3344;
+    font-family: 'Press Start 2P', cursive;
+    font-size:40px;
+    
 }

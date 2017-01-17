@@ -44,13 +44,13 @@ Ship.prototype.update = function () {
     this.velocityMag = this.velocity.magnitude();
 
     if (this.doRight) {
-        this.angle -= 4;
+        this.angle -= 6;
         this.rotate()
         this.velocity.setComponents(this.angle, this.velocityMag);
     }
 
     if (this.doLeft) {
-        this.angle += 4;
+        this.angle += 6;
         this.rotate();
         this.velocity.setComponents(this.angle, this.velocityMag);
     }

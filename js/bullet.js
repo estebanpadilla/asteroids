@@ -4,9 +4,9 @@ function Bullet(id, position, direction, speed, color, removeBullet) {
     }
 
     this.id = id;
-    this.svg;
-    this.rect;
-    this.group;
+    this.svg = null;
+    this.rect = null;
+    this.group = null;
 
     this.position = position;
     this.width = 5;
@@ -22,14 +22,12 @@ function Bullet(id, position, direction, speed, color, removeBullet) {
     this.render()
     this.update();
     this.rotate();
+
+    this.readyToRemove = false;
 }
 
 Bullet.prototype.update = function () {
-
     this.velocityMag = this.velocity.magnitude();
-
-    // this.rotate();
-
     this.position.add(this.velocity);
     this.checkBoundaries();
 }
@@ -58,18 +56,23 @@ Bullet.prototype.rotate = function () {
 
 Bullet.prototype.checkBoundaries = function () {
 
+    // if (this.svg != null) {
     if (this.position.x > (window.innerWidth + this.width) ||
         this.position.x < (0 - this.width) ||
         this.position.y > (window.innerHeight + this.height) ||
         this.position.y < (0 - this.height)) {
-        this.remove();
+        // this.remove();
+        this.readyToRemove = true;
     }
 
     this.svg.style.left = this.position.x;
     this.svg.style.top = this.position.y;
+    // }
 }
 
 Bullet.prototype.remove = function () {
+    // if (this.svg != null) {
     this.svg.parentNode.removeChild(this.svg);
     this.removeBullet(this);
+    // }
 }
