@@ -1,7 +1,7 @@
 html, body {
     padding: 0px;
     margin: 0px;
-    background:#040707;
+    background:#1e0a2d;
     height:100%;
     overflow: hidden;
 }
@@ -9,7 +9,7 @@ html, body {
 .score {
     font-family: 'Press Start 2P', cursive;
     font-size: 60px;
-    color: white;
+    color: lawngreen;
     width: 50%;
     text-align: center;
     
@@ -18,7 +18,7 @@ html, body {
 .level {
     font-family: 'Press Start 2P', cursive;
     font-size: 60px;
-    color: white;
+    color: lawngreen;
     width: 20%;
     text-align: center;
 }
@@ -46,7 +46,7 @@ canvas {
     z-index: 99 !important;
     border: solid;
     border-width: 5px;
-    border-color: #ee3344;
+    border-color: lawngreen;
     border-radius: 0px;
     left: 25%;
     top: 40%;
@@ -54,7 +54,7 @@ canvas {
     height: 20%;
     min-height:20%; 
     background: rgba(0, 0,0, 0.25);
-    color: #ee3344;
+    color: lawngreen;
     font-family: 'Press Start 2P', cursive;
     font-size:40px;
     

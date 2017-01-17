@@ -9,12 +9,20 @@ function init() {
     let asteroidMed = 15;
     let asteroidSmall = 25;
     let level = 0;
-    let levels = [[1, 2, 1, 2, 1],
-    [1, 2, 1, 3, 2, , 3, 3, 4],
-    [1, 4, 1, 2, 3, 1, 2, 1, 2, 4, 4, 3, 1],
-    [1, 2, 2, 2, 3, 4, 3, 4, 3, 4, 3, 3, 2, 1, 2, 3],
-    [1, 2, 2, 2, 3, 4, 3, 4, 3, 4, 3, 3, 2, 1, 2, 3, 2, 1, 2]];
+    let levels = [[1, 2, 1, 2, 2, 2],
+    [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
+    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
+    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
 
+    // let levels = [[4],
+    // [4],
+    // [4]];
+
+    let background = '#2b0d3b';
+    let creme = '#f6e6ca';
+    let lightblue = '#b5e2ef';
+    let red = '#ee3344';
+    let bulletColor = 'lawngreen';
     let goCounter = 0;
     let poolAsteroids = new Map();
     let poolBullets = new Map();
@@ -26,7 +34,7 @@ function init() {
     startBtn.onclick = startBtnClick;
 
     function addShip() {
-        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, '#f58d82', addBullet, removeShip);
+        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, bulletColor, addBullet, removeShip);
     }
 
     function addAsteroids() {
@@ -135,7 +143,7 @@ function init() {
     function addBullet() {
         let shootPosition = Vector((ship.position.x + (ship.width / 2) - 2), (ship.position.y + (ship.height / 2) - 2));
         goCounter++;
-        let bullet = Bullet(goCounter, shootPosition, ship.angle, (5 + ship.velocityMag), 'white', removeBullet);
+        let bullet = Bullet(goCounter, shootPosition, ship.angle, (5 + ship.velocityMag), bulletColor, removeBullet);
         poolBullets.set(goCounter, bullet);
     }
 
@@ -237,47 +245,54 @@ function init() {
         // cleanBullets();
         setTimeout(startNewLevel, 1000);
     }
+
     function startNewLevel() {
         level++;
-        levelTitle.firstChild.nodeValue = '' + (level + 1);
-        addAsteroids();
+
+        if (level < levels.length) {
+            levelTitle.firstChild.nodeValue = '' + (level + 1);
+            addAsteroids();
+        } else {
+            gameEnd();
+        }
+
     }
 
     function ramdonColor() {
         let value = ramdonIn(1, 11);
         switch (value) {
             case 1:
-                return '#c056a1';
+                return red;
                 break;
             case 2:
-                return '#77b1e1';
+                return lightblue;
                 break;
             case 3:
-                return '#c53f31';
+                return creme;
                 break;
             case 4:
-                return '#bdb331';
+                return red;
                 break;
             case 5:
-                return '#d6d6d6';
+                return red;
                 break;
             case 6:
-                return '#c056a1';
+                return lightblue;
                 break;
             case 7:
-                return '#77b1e1';
+                return creme;
                 break;
             case 8:
-                return '#c53f31';
+                return red;
                 break;
             case 9:
-                return '#bdb331';
+                return creme;
                 break;
             case 10:
-                return '#d6d6d6';
+                return red;
                 break;
             default:
-                return '#c53f31';
+                return lightblue;
                 break;
         }
     }
