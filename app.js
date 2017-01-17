@@ -12,10 +12,10 @@ function init() {
     let alienMed = 15;
     let alienSmall = 25;
     let level = 0;
-    let levels = [[1, 2, 1, 2, 2, 2],
-    [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
-    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
-    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
+    let levels = [[3, 4, 3, 4, 2, 2],
+    [3, 4, 3, 4, 3, 3, 2, 3, 1, 1, 3, 2],
+    [2, 3, 4, 2, 3, 2, 3, 4, 3, 4, 3, 3, 3, 4, 3, 4, 3],
+    [2, 3, 3, 2, 4, 2, 3, 2, 3, 1, 3, 4, 3, 2, 3, 4, 3, 4, 2, 3, 3, 4, 3]];
     let levelAlienTimer = [];
 
     // let levels = [[4],
@@ -75,7 +75,7 @@ function init() {
                 let rect = Rect((ship.position.x + 5), (ship.position.y + 20), (ship.width - 20), (ship.height - 20));
                 if (asteroid.isTouching(rect)) {
                     addAsteroidOnTouch(asteroid);
-                    gameEnd();
+                    //gameEnd();
                     break;
                 }
             }
@@ -97,7 +97,7 @@ function init() {
                     let rect = Rect((ship.position.x + 5), (ship.position.y + 20), (ship.width - 20), (ship.height - 20));
                     if (bullet.isTouching(rect)) {
                         console.log('ship destroy by alien');
-                        gameEnd();
+                        //gameEnd();
                         break;
                     }
                 }
@@ -129,6 +129,8 @@ function init() {
             default:
                 break;
         }
+        e.preventDefault();
+        return false;
     }
 
     function keyupHandler(e) {
@@ -185,7 +187,6 @@ function init() {
         let time = 0;
         for (var i = 0; i < levels[level].length; i++) {
 
-
             // levelAlienTimer.push(time);
             let y = -100;
             let x = 0;
@@ -209,22 +210,22 @@ function init() {
 
     function addAsteroidOnTouch(asteroid) {
 
-        if (asteroid.type == 1 || asteroid.type == 2) {
+        if (asteroid.type == 3 || asteroid.type == 4) {
             goCounter++;
-            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 4), 3, ramdonColor(), removeAsteroid);
+            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 4), 2, ramdonColor(), removeAsteroid);
             poolAsteroids.set(goCounter, asteroid1);
 
             goCounter++;
-            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(2, 5), 3, ramdonColor(), removeAsteroid);
+            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(2, 5), 2, ramdonColor(), removeAsteroid);
             poolAsteroids.set(goCounter, asteroid2);
             score += asteroidBig;
-        } else if (asteroid.type == 3) {
+        } else if (asteroid.type == 2) {
             goCounter++;
-            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 4, ramdonColor(), removeAsteroid);
+            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid);
             poolAsteroids.set(goCounter, asteroid1);
 
             goCounter++;
-            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 4, ramdonColor(), removeAsteroid);
+            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid);
             poolAsteroids.set(goCounter, asteroid2);
             score += asteroidMed;
         } else {
@@ -257,16 +258,65 @@ function init() {
     }
 
     function removeAsteroid(go) {
+        addExplotion(go);
         poolAsteroids.delete(go.id)
     }
 
     function removeAlient(go) {
+        addExplotion(go);
         poolAliens.delete(go.id);
     }
 
     function removeShip(go) {
+        addExplotion(go);
         ship = null;
     }
+
+    function addExplotion(go) {
+        // const brust = new mojs.Burst({
+        //     left: (go.position.x + (go.width / 2)),
+        //     top: (go.position.y + (go.height / 2)),
+        //     radius: ramdonIn(30, 100),
+        //     count: ramdonIn(5, 10),
+        //     opacity: { 1: 0 },
+        //     fill: go.color,
+        // }).play();
+        const burst = new mojs.Burst({
+            left: (go.position.x + (go.width / 2)),
+            top: (go.position.y + (go.height / 2)),
+            radius: { 0: (go.type * 50) },
+            angle: { 0: ramdonIn(0, 90) },
+            count: ramdonIn(3, 10),
+            isShowEnd: false,
+            children: {
+                shape: 'rect',
+                fill: go.color,
+                radius: 5
+            },
+            onComplete: function () { removeEl(this.el); }
+        }).play();
+
+
+        const circle = new mojs.Shape({
+            left: (go.position.x + (go.width / 2)),
+            top: (go.position.y + (go.height / 2)),
+            stroke: go.color,
+            strokeWidth: { 10: ramdonIn(10, (go.type * 10)) },
+            fill: 'none',
+            scale: { .2: 1 },
+            opacity: { 1: 0 },
+            // isForce3d: true,
+            isShowEnd: false,
+            radius: ramdonIn(40, (go.type * 60)),
+            easing: 'cubic.out',
+            delay: ramdonIn(100, 200),
+            onComplete: function () { removeEl(this.el); }
+        }).play();
+
+
+    }
+
+    var removeEl = function removeEl(node) { node.parentNode.removeChild(node); }
 
     //Game play methods
     function gameEnd() {
