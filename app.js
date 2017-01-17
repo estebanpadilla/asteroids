@@ -12,14 +12,15 @@ function init() {
     let alienMed = 15;
     let alienSmall = 25;
     let level = 0;
-    // let levels = [[1, 2, 1, 2, 2, 2],
-    // [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
-    // [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
-    // [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
+    let levels = [[1, 2, 1, 2, 2, 2],
+    [2, 1, 2, 1, 3, 3, 2, 3, 4, 4, 3, 2],
+    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3],
+    [2, 3, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 1, 2, 3, 4, 4, 3]];
+    let levelAlienTimer = [];
 
-    let levels = [[4],
-    [4],
-    [4]];
+    // let levels = [[4],
+    // [4],
+    // [4]];
 
     let background = '#2b0d3b';
     let creme = '#f6e6ca';
@@ -181,7 +182,11 @@ function init() {
 
     function addAsteroids() {
 
+        let time = 0;
         for (var i = 0; i < levels[level].length; i++) {
+
+
+            // levelAlienTimer.push(time);
             let y = -100;
             let x = 0;
 
