@@ -49,11 +49,8 @@ function Asteroid(id, position, direction, speed, type, color, removeAsteroid) {
 }
 
 Asteroid.prototype.update = function () {
-
     this.velocityMag = this.velocity.magnitude();
-
     this.rotate();
-
     this.position.add(this.velocity);
     this.checkBoundaries();
 }
