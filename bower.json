@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "mojs": "^0.288.1",
-    "ludusy": "^1.1.1"
+    "ludusy": "^1.1.1",
+    "stats.js": "*"
   }
 }

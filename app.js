@@ -2,6 +2,10 @@ window.addEventListener('load', init, false);
 
 function init() {
 
+    var stats = new Stats();
+    stats.showPanel(1);
+    document.body.appendChild(stats.dom);
+
     let ship = null,
         requestId = undefined,
         score = 0,
@@ -50,6 +54,7 @@ function init() {
     addAlient();
 
     function update() {
+        stats.begin();
 
         for (let bullet of poolBullets.values()) {
             bullet.update();
@@ -107,6 +112,7 @@ function init() {
             ship.update();
         }
 
+        stats.end();
         requestId = requestAnimationFrame(update);
     }
     update();
@@ -158,7 +164,7 @@ function init() {
     }
 
     function addBullet() {
-        let shootPosition = Vector((ship.position.x + (ship.width / 2) - 2), (ship.position.y + (ship.height / 2) - 2));
+        let shootPosition = Vector((ship.position.x + (ship.width / 2) - 5), (ship.position.y + (ship.height / 2) - 3));
         goCounter++;
         let bullet = Bullet(goCounter, shootPosition, ship.angle, (7 + ship.velocityMag), bulletColor, removeBullet, svg);
         poolBullets.set(goCounter, bullet);
