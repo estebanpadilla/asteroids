@@ -1,10 +1,10 @@
-function Ship(id, position, width, height, color, addBullet, removeShip) {
+function Ship(id, position, width, height, color, addBullet, removeShip, svg) {
     if (!(this instanceof Ship)) {
-        return new Ship(id, position, width, height, color, addBullet, removeShip);
+        return new Ship(id, position, width, height, color, addBullet, removeShip, svg);
     }
 
     this.id = id;
-    this.svg;
+    this.svg = svg;
     this.polygone;
     this.group;
 
@@ -31,12 +31,12 @@ function Ship(id, position, width, height, color, addBullet, removeShip) {
 
     this.canShoot = true;
     this.shootCounter = 0;
-    this.shootCounterLimit = 15;
+    this.shootCounterLimit = 10;
     this.addBullet = addBullet;
-
     this.removeShip = removeShip;
-    this.render()
+    this.render();
     this.update();
+    this.rotationAngle = 1;
 }
 
 Ship.prototype.update = function () {
@@ -44,15 +44,22 @@ Ship.prototype.update = function () {
     this.velocityMag = this.velocity.magnitude();
 
     if (this.doRight) {
-        this.angle -= 6;
-        this.rotate()
+        this.angle -= this.rotationAngle;
+        // this.rotate()
         this.velocity.setComponents(this.angle, this.velocityMag);
+        this.rotationAngle += 0.25;
     }
 
     if (this.doLeft) {
-        this.angle += 6;
-        this.rotate();
+        this.angle += this.rotationAngle;
+        // this.rotate();
         this.velocity.setComponents(this.angle, this.velocityMag);
+        this.rotationAngle += 0.25;
+    }
+
+
+    if (!this.doLeft && !this.doRight) {
+        this.rotationAngle = 1;
     }
 
     if (this.doThrust) {
@@ -77,35 +84,24 @@ Ship.prototype.update = function () {
         if (this.shootCounter >= this.shootCounterLimit) {
             this.canShoot = true;
             this.shootCounter = 0;
-
-            console.log('shoot');
             this.addBullet();
-
         } else {
             this.canShoot = false;
         }
     }
 
-
     this.position.add(this.velocity.remove(this.friction).add(this.acceleration));
     this.checkBoundaries();
-
+    this.group.setAttribute('transform', 'translate(' + this.position.x + ' ' + this.position.y + ') rotate(' + this.angle + ' ' + ((this.width / 2) - 4) + ' ' + (this.height / 2) + ')');
 }
-
 
 Ship.prototype.render = function () {
     let xmlns = "http://www.w3.org/2000/svg";
-    this.svg = document.createElementNS(xmlns, 'svg');
-    this.svg.setAttribute('id', this.id);
-    this.svg.setAttribute('width', this.width);
-    this.svg.setAttribute('height', this.height);
-    this.svg.style.fill = this.color;
-    document.body.appendChild(this.svg);
-
     this.group = document.createElementNS(xmlns, 'g');
     this.svg.appendChild(this.group);
 
     this.polygone = document.createElementNS(xmlns, 'polygon');
+    this.polygone.setAttribute('fill', this.color);
     this.polygone.setAttribute('points', '12.5,27.5 22.5,27.5 22.5,22.5 32.5,22.5 32.5,17.5 22.5,17.5 22.5,12.5 12.5,12.5 12.5,7.5 7.5,7.5 7.5,32.5 12.5,32.5');
     this.group.appendChild(this.polygone);
 }
@@ -131,12 +127,13 @@ Ship.prototype.checkBoundaries = function () {
     if (this.position.y < (0 - this.height)) {
         this.position.y = window.innerHeight;
     }
-
-    this.svg.style.left = this.position.x;
-    this.svg.style.top = this.position.y;
 }
 
 Ship.prototype.remove = function () {
-    this.svg.parentNode.removeChild(this.svg);
+    this.svg.removeChild(this.group);
     this.removeShip(this);
+}
+
+Ship.prototype.getBounds = function () {
+    return Rect((this.position.x + 5), (this.position.y + 20), (this.width - 20), (this.height - 20));
 }

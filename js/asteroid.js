@@ -1,25 +1,21 @@
-function Asteroid(id, position, direction, speed, type, color, removeAsteroid) {
+function Asteroid(id, position, direction, speed, type, color, removeAsteroid, svg) {
     if (!(this instanceof Asteroid)) {
-        return new Asteroid(id, position, direction, speed, type, color, removeAsteroid);
+        return new Asteroid(id, position, direction, speed, type, color, removeAsteroid, svg);
     }
 
     this.id = id;
-    this.svg;
+    this.svg = svg;
     this.polygone;
     this.group;
-
+    this.speed = speed;
     this.position = position;
     this.type = type;
     this.points = '';
-    this.width = 40;
-    this.height = 40;
+    this.width = 0;
+    this.height = 0;
     this.color = color;
-    this.angle = 0;
-    this.direction = direction;
-
-    this.velocityMag = 0;
-    this.velocity = Vector().setComponents(direction, speed);
-
+    this.angle = direction;
+    this.velocity = Vector().setComponents(this.angle, this.speed);
 
     if (type == 4) {
         //Big 1
@@ -49,32 +45,22 @@ function Asteroid(id, position, direction, speed, type, color, removeAsteroid) {
 }
 
 Asteroid.prototype.update = function () {
-    this.velocityMag = this.velocity.magnitude();
-    this.rotate();
+
     this.position.add(this.velocity);
     this.checkBoundaries();
+    this.group.setAttribute('transform', 'translate(' + this.position.x + ' ' + this.position.y + ')');
 }
 
 Asteroid.prototype.render = function () {
     let xmlns = "http://www.w3.org/2000/svg";
-    this.svg = document.createElementNS(xmlns, 'svg');
-    this.svg.setAttribute('id', this.id);
-    this.svg.setAttribute('width', this.width);
-    this.svg.setAttribute('height', this.height);
-    this.svg.style.fill = this.color;
-    document.body.appendChild(this.svg);
-
     this.group = document.createElementNS(xmlns, 'g');
     this.svg.appendChild(this.group);
 
     this.polygone = document.createElementNS(xmlns, 'polygon');
     this.polygone.setAttribute('points', this.points);
+    this.polygone.setAttribute('fill', this.color);
     this.group.appendChild(this.polygone);
 }
-
-Asteroid.prototype.rotate = function () {
-    this.group.setAttribute('transform', 'rotate(' + this.angle + ' ' + this.width / 2 + ' ' + this.height / 2 + ')');
-};
 
 Asteroid.prototype.checkBoundaries = function () {
 
@@ -93,24 +79,19 @@ Asteroid.prototype.checkBoundaries = function () {
     if (this.position.y < (0 - this.height)) {
         this.position.y = window.innerHeight;
     }
-
-    this.svg.style.left = this.position.x;
-    this.svg.style.top = this.position.y;
-}
-
-Asteroid.prototype.isTouching = function (rect) {
-    // console.log(rect);
-    if ((rect.x + rect.width) > this.position.x &&
-        rect.x < (this.position.x + this.width) &&
-        (rect.y + rect.width) > this.position.y &&
-        rect.y < (this.position.y + this.height)) {
-        return true;
-    }
-    return false;
 }
 
 Asteroid.prototype.remove = function () {
-    this.svg.parentNode.removeChild(this.svg);
     this.removeAsteroid(this);
+    this.svg.removeChild(this.group);
+    this.position = null;
+    this.velocity = null;
+    this.svg = null
+    this.polygone = null;
+    this.group = null;
+}
+
+Asteroid.prototype.getBounds = function () {
+    return Rect(this.position.x, this.position.y, this.width, this.height);
 }
 

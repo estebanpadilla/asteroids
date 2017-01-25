@@ -1,26 +1,32 @@
 window.addEventListener('load', init, false);
+
 function init() {
 
-    let ship = null;
-    let requestId = undefined;
+    let ship = null,
+        requestId = undefined,
+        score = 0,
+        asteroidBig = 10,
+        asteroidMed = 15,
+        asteroidSmall = 25,
+        alienBig = 10,
+        alienMed = 15,
+        alienSmall = 5;
 
-    let score = 0;
-    let asteroidBig = 10;
-    let asteroidMed = 15;
-    let asteroidSmall = 25;
-    let alienBig = 10;
-    let alienMed = 15;
-    let alienSmall = 25;
-    let level = 0;
-    let levels = [[3, 4, 3, 4, 2, 2],
-    [3, 4, 3, 4, 3, 3, 2, 3, 1, 1, 3, 2],
-    [2, 3, 4, 2, 3, 2, 3, 4, 3, 4, 3, 3, 3, 4, 3, 4, 3],
-    [2, 3, 3, 2, 4, 2, 3, 2, 3, 1, 3, 4, 3, 2, 3, 4, 3, 4, 2, 3, 3, 4, 3]];
-    let levelAlienTimer = [];
+    let level = 0,
+        levels = [[4, 3, 4, 3, 4],
+        [3, 4, 3, 4, 3, 3, 2, 3, 1, 1, 3, 2],
+        [2, 3, 4, 2, 3, 2, 3, 4, 3, 4, 3, 3, 3, 4, 3, 4, 3],
+        [2, 3, 3, 2, 4, 2, 3, 2, 3, 1, 3, 4, 3, 2, 3, 4, 3, 4, 2, 3, 3, 4, 3]],
+        levelAlienTimer = [];
 
-    // let levels = [[4],
-    // [4],
-    // [4]];
+    let xmlns = "http://www.w3.org/2000/svg";
+    let svg = document.createElementNS(xmlns, 'svg');
+    svg.setAttribute('id', 'rootsvvg');
+    svg.setAttribute('width', window.innerWidth);
+    svg.setAttribute('height', window.innerHeight);
+    svg.style.left = 0;
+    svg.style.top = 0;
+    document.body.appendChild(svg);
 
     let background = '#2b0d3b';
     let creme = '#f6e6ca';
@@ -28,13 +34,12 @@ function init() {
     let red = '#ee3344';
     let bulletColor = 'lawngreen';
     let alienColor = '#ffdd17';
+
     let goCounter = 0;
     let poolAsteroids = new Map();
     let poolBullets = new Map();
     let poolAliens = new Map;
-    let poolAlienBullets = new Map;
-
-    let angle = 0;
+    let poolAlienBullets = new Map();
 
     let scoreTitle = document.getElementById('scoreTitle');
     let levelTitle = document.getElementById('levelTitle');
@@ -42,27 +47,26 @@ function init() {
     startBtn.onclick = startBtnClick;
 
     addAsteroids();
-    update();
+    addAlient();
 
     function update() {
 
         for (let bullet of poolBullets.values()) {
             bullet.update();
-            if (bullet.readyToRemove) {
-                bullet.remove();
-            } else {
+            if (!bullet.isRemove) {
                 for (let asteroid of poolAsteroids.values()) {
-                    let rect = Rect(bullet.position.x, bullet.position.y, bullet.width, bullet.height);
-                    if (asteroid.isTouching(rect)) {
-                        addAsteroidOnTouch(asteroid);
+                    if (hitPointOnRect(bullet.position.x, bullet.position.y, asteroid.getBounds())) {
                         bullet.remove();
+                        addAsteroidOnTouch(asteroid);
                         break;
                     }
                 }
+            }
+
+            if (!bullet.isRemove) {
                 for (let alien of poolAliens.values()) {
-                    let rect = Rect((alien.position.x + 5), (alien.position.y + 20), (alien.width - 20), (alien.height - 20));
-                    if (bullet.isTouching(rect)) {
-                        console.log('ship destroy alien');
+                    if (hitPointOnRect(bullet.position.x, bullet.position.y, alien.getBounds())) {
+                        bullet.remove();
                         alien.remove();
                         break;
                     }
@@ -72,10 +76,9 @@ function init() {
 
         for (let asteroid of poolAsteroids.values()) {
             if (ship != null) {
-                let rect = Rect((ship.position.x + 5), (ship.position.y + 20), (ship.width - 20), (ship.height - 20));
-                if (asteroid.isTouching(rect)) {
+                if (hitRectOnRect(asteroid.getBounds(), ship.getBounds())) {
                     addAsteroidOnTouch(asteroid);
-                    //gameEnd();
+                    gameEnd();
                     break;
                 }
             }
@@ -90,18 +93,13 @@ function init() {
 
             bullet.update();
 
-            if (bullet.readyToRemove) {
-                bullet.remove();
-            } else {
+            if (!bullet.isRemove) {
                 if (ship != null) {
-                    let rect = Rect((ship.position.x + 5), (ship.position.y + 20), (ship.width - 20), (ship.height - 20));
-                    if (bullet.isTouching(rect)) {
-                        console.log('ship destroy by alien');
-                        //gameEnd();
+                    if (hitPointOnRect(bullet.position.x, bullet.position.y, ship.getBounds())) {
+                        gameEnd();
                         break;
                     }
                 }
-
             }
         }
 
@@ -111,6 +109,7 @@ function init() {
 
         requestId = requestAnimationFrame(update);
     }
+    update();
 
     function keydownHandler(e) {
 
@@ -155,13 +154,13 @@ function init() {
 
     //Add Methods
     function addShip() {
-        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, bulletColor, addBullet, removeShip);
+        ship = Ship(goCounter, Vector(window.innerWidth / 2, window.innerHeight / 2), 40, 40, bulletColor, addBullet, removeShip, svg);
     }
 
     function addBullet() {
         let shootPosition = Vector((ship.position.x + (ship.width / 2) - 2), (ship.position.y + (ship.height / 2) - 2));
         goCounter++;
-        let bullet = Bullet(goCounter, shootPosition, ship.angle, (5 + ship.velocityMag), bulletColor, removeBullet);
+        let bullet = Bullet(goCounter, shootPosition, ship.angle, (7 + ship.velocityMag), bulletColor, removeBullet, svg);
         poolBullets.set(goCounter, bullet);
     }
 
@@ -179,7 +178,7 @@ function init() {
 
         // let shootPosition = Vector(alien.position.x, alien.position.y);
         goCounter++;
-        let bullet = Bullet(goCounter, position, direction, ramdonIn(2, 5), alien.color, removeAlienBullet);
+        let bullet = Bullet(goCounter, position, direction, ramdonIn(2, 5), alien.color, removeAlienBullet, svg);
         poolAlienBullets.set(goCounter, bullet);
     }
 
@@ -204,7 +203,7 @@ function init() {
             }
 
             goCounter++;
-            let asteroid = Asteroid(goCounter, Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), levels[level][i], ramdonColor(), removeAsteroid);
+            let asteroid = Asteroid(goCounter, Vector(x, y), ramdonIn(-90, 90), ramdonIn(1, 3), levels[level][i], ramdonColor(), removeAsteroid, svg);
             poolAsteroids.set(goCounter, asteroid);
         }
     }
@@ -213,20 +212,20 @@ function init() {
 
         if (asteroid.type == 3 || asteroid.type == 4) {
             goCounter++;
-            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 4), 2, ramdonColor(), removeAsteroid);
+            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 4), 2, ramdonColor(), removeAsteroid, svg);
             poolAsteroids.set(goCounter, asteroid1);
 
             goCounter++;
-            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(2, 5), 2, ramdonColor(), removeAsteroid);
+            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(2, 5), 2, ramdonColor(), removeAsteroid, svg);
             poolAsteroids.set(goCounter, asteroid2);
             score += asteroidBig;
         } else if (asteroid.type == 2) {
             goCounter++;
-            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid);
+            let asteroid1 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid, svg);
             poolAsteroids.set(goCounter, asteroid1);
 
             goCounter++;
-            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid);
+            let asteroid2 = Asteroid(goCounter, Vector(asteroid.position.x, asteroid.position.y), ramdonIn(0, 360), ramdonIn(1, 3), 1, ramdonColor(), removeAsteroid, svg);
             poolAsteroids.set(goCounter, asteroid2);
             score += asteroidMed;
         } else {
@@ -243,33 +242,35 @@ function init() {
 
     function addAlient() {
         goCounter++;
-        let alien = Alien(goCounter, Vector(50, 500), 0, ramdonIn(1, 3), 3, alienColor, addAlienBullet, removeAlient);
+        let alien = Alien(goCounter, Vector(50, 500), 0, ramdonIn(1, 3), 3, alienColor, addAlienBullet, removeAlient, svg);
         poolAliens.set(goCounter, alien);
     }
-
-    addAlient();
-
     //Remove Methods
     function removeBullet(go) {
         poolBullets.delete(go.id);
+        go = null;
     }
 
     function removeAlienBullet(go) {
         poolAlienBullets.delete(go.id);
+        go = null;
     }
 
     function removeAsteroid(go) {
-        addExplotion(go);
+        // addExplotion(go);
         poolAsteroids.delete(go.id)
+        go = null;
     }
 
     function removeAlient(go) {
-        addExplotion(go);
+        // addExplotion(go);
         poolAliens.delete(go.id);
+        go = null;
     }
 
     function removeShip(go) {
-        addExplotion(go);
+        // addExplotion(go);
+        go = null;
         ship = null;
     }
 
